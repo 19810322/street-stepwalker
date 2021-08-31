@@ -23,7 +23,8 @@ I shut myself up in my home all day, so I get fat...
 4. You make the Digispark shield.
 5. You put a Digispark to the right side of Exercise Stepper.
 6. You boot your PC and run Google Street view.
-7. You step the Exercise Stepper.
+7. You connect between PC and Digispark with USB.
+8. You step the Exercise Stepper.
 
 ## How to operation
 - Go straight: Step on the step board.

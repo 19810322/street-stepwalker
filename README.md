@@ -14,7 +14,7 @@ I shut myself up in my home all day, so I get fat...
 - Switch (e.g. tactile switch)
 
 ## Circuit
-[fig.1 circuit overview](digispark-circuit.png)
+![fig.1 circuit overview](digispark-circuit.png)
 
 ## How to use
 1. You should buy Exercise Stepper.

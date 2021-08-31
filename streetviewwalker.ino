@@ -10,10 +10,10 @@ v003
 #define LED_PIN 1
 #define BUTTON_PIN 2
 
-char sensorSide = 'right';
+bool sensorSideIsRight;
 unsigned long upTime;
 int stepTotal;
-bool holeIcPast;
+bool hallIcPast;
 bool buttonPast;
 
 void flashled(int times, int flashWait) {
@@ -29,13 +29,14 @@ void flashled(int times, int flashWait) {
 
 void setup() {
 
+  sensorSideIsRight = true;
   buttonPast = false;
 
   pinMode(SENSOR_PIN, INPUT_PULLUP); //HOLE IC Sensor
   pinMode(BUTTON_PIN, INPUT_PULLUP); //Button
   pinMode(LED_PIN, OUTPUT); //LED on Model A 
  
-  holeIcPast = digitalRead(0);
+  hallIcPast = digitalRead(SENSOR_PIN);
   stepTotal = 0;
 
   flashled(1,1000);
@@ -45,42 +46,45 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
 
-  byte holeIcRead;
+  byte hallIcRead;
   byte buttonStat;
   buttonStat = 0;
 
   upTime = millis();
-  holeIcRead = digitalRead(SENSOR_PIN);
+  hallIcRead = digitalRead(SENSOR_PIN);
 
-  if(holeIcRead != holeIcPast && holeIcRead == LOW) { //ホールICが磁気反応に転じた瞬間(w送信)
+  if(hallIcRead != hallIcPast && hallIcRead == HIGH) { //ホールICが磁気反応に転じた瞬間
     stepTotal++;
  
-    DigiKeyboard.sendKeyStroke(KEY_W);
     digitalWrite(LED_PIN, HIGH);
     DigiKeyboard.delay(CHATTERING_WAIT_PERIOD); //チャタリング防止の不感時間
   }
 
-  if(holeIcRead != holeIcPast && holeIcRead == HIGH) { //ホールICが磁気無反応に転じた瞬間
+  if(hallIcRead != hallIcPast && hallIcRead == LOW) { //ホールICが磁気無反応に転じた瞬間(w送信)
+    DigiKeyboard.sendKeyStroke(KEY_W);
+    
     digitalWrite(LED_PIN, LOW);
     DigiKeyboard.delay(CHATTERING_WAIT_PERIOD); //チャタリング防止の不感時間
   }
 
   buttonStat = digitalRead(BUTTON_PIN);
 
-  if(buttonStat == LOW && holeIcRead == LOW && buttonPast == false) { //ホールICが磁気反応かつボタンが押された瞬間
+  if(buttonStat == LOW && buttonPast == false) { //ボタンが押された瞬間
     buttonPast = true;
-    if(sensorSide == 'right'){
-      DigiKeyboard.sendKeyPress(KEY_D); //本体が右設置の場合はd(右)キーを押下
-    } else {
-      DigiKeyboard.sendKeyPress(KEY_A); //本体が左設置の場合はa(左)キーを押下
-    }
-  }
-  if(buttonStat == LOW && holeIcRead == HIGH && buttonPast == false) { //ホールICが磁気無反応かつボタンが押された瞬間
-    buttonPast = true;
-    if(sensorSide == 'right'){
-      DigiKeyboard.sendKeyPress(KEY_A); //本体が右設置の場合はa(左)キーを押下
-    } else {
-      DigiKeyboard.sendKeyPress(KEY_D); //本体が左設置の場合はd(左)キーを押下
+    if(sensorSideIsRight == true ) { //磁気センサをステッパーの右側に設置した場合
+      if(hallIcRead == HIGH){ //磁気センサ反応
+        DigiKeyboard.sendKeyPress(KEY_D); //本体が右設置の場合はd(右)キーを押下
+      }
+      if(hallIcRead == LOW){ //磁気センサ無反応
+        DigiKeyboard.sendKeyPress(KEY_A); //本体が右設置の場合はa(左)キーを押下
+      }
+    } else {  //磁気センサをステッパーの左側に設置した場合
+      if(hallIcRead == HIGH){ //磁気センサ反応
+        DigiKeyboard.sendKeyPress(KEY_A); //本体が右設置の場合はa(左)キーを押下
+      }
+      if(hallIcRead == LOW){ //磁気センサ無反応
+        DigiKeyboard.sendKeyPress(KEY_D); //本体が右設置の場合はd(右)キーを押下
+      }
     }
   }
 
@@ -89,6 +93,6 @@ void loop() {
     buttonPast = false;    
   }
 
-  holeIcPast = holeIcRead;
+  hallIcPast = hallIcRead;
 
 }
